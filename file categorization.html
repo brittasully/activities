@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Sorting for 1st Grade</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f8ff;
+            text-align: center;
+        }
+        h1 {
+            color: #333;
+        }
+        .game-container {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 20px auto;
+            flex-wrap: wrap;
+        }
+        .category {
+            width: 200px;
+            border: 3px solid #4CAF50;
+            border-radius: 10px;
+            background-color: #fff;
+            padding: 15px;
+            text-align: center;
+        }
+        .drop-zone {
+            min-height: 150px;
+            border: 2px dashed #888;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+        }
+        .item {
+            padding: 15px;
+            border: 1px solid #555;
+            background-color: #ffd700;
+            cursor: grab;
+            display: inline-block;
+            margin: 10px;
+            border-radius: 5px;
+        }
+        .correct {
+            background-color: #4CAF50 !important;
+        }
+        .incorrect {
+            background-color: #FF6347 !important;
+        }
+    </style>
+</head>
+<body>
+    <h1>Help Robo Sort the Files!</h1>
+    <p>Drag the items into the correct folder.</p>
+    <div class="game-container">
+        <div class="category">
+            <h2>Pictures</h2>
+            <div class="drop-zone" id="pictures-zone"></div>
+        </div>
+        <div class="category">
+            <h2>Music</h2>
+            <div class="drop-zone" id="music-zone"></div>
+        </div>
+    </div>
+    <div id="items-container"></div>
+    <button onclick="checkAnswers()">Submit</button>
+    <div id="feedback"></div>
+    <script>
+        const fileTypes = [
+            { name: "🖼️ Image", category: "pictures" },
+            { name: "🎵 Song", category: "music" },
+            { name: "🖼️ Photo", category: "pictures" },
+            { name: "🎶 Tune", category: "music" }
+        ];
+
+        function populateItems() {
+            const itemsContainer = document.getElementById("items-container");
+            fileTypes.forEach((file) => {
+                const div = document.createElement("div");
+                div.className = "item";
+                div.draggable = true;
+                div.dataset.category = file.category;
+                div.textContent = file.name;
+                div.addEventListener("dragstart", (e) => {
+                    e.dataTransfer.setData("text/plain", file.category);
+                });
+                itemsContainer.appendChild(div);
+            });
+        }
+
+        function initializeDropZones() {
+            document.querySelectorAll(".drop-zone").forEach((zone) => {
+                zone.addEventListener("dragover", (e) => {
+                    e.preventDefault();
+                });
+                zone.addEventListener("drop", (e) => {
+                    e.preventDefault();
+                    const category = e.dataTransfer.getData("text/plain");
+                    const draggedItem = document.querySelector(".item:hover");
+                    if (zone.id.includes(category)) {
+                        zone.appendChild(draggedItem);
+                        draggedItem.classList.add("correct");
+                    } else {
+                        draggedItem.classList.add("incorrect");
+                        setTimeout(() => draggedItem.classList.remove("incorrect"), 1000);
+                    }
+                });
+            });
+        }
+
+        function checkAnswers() {
+            let correctCount = 0;
+            document.querySelectorAll(".drop-zone").forEach((zone) => {
+                const expectedCategory = zone.id.replace("-zone", "");
+                zone.querySelectorAll(".item").forEach((item) => {
+                    if (item.dataset.category === expectedCategory) {
+                        item.classList.add("correct");
+                        correctCount++;
+                    }
+                });
+            });
+            document.getElementById("feedback").textContent = `You sorted ${correctCount}/${fileTypes.length} correctly!`;
+        }
+
+        populateItems();
+        initializeDropZones();
+    </script>
+</body>
+</html>
