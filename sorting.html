@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sorting Algorithms Puzzle</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+            background-color: #FBA01C;
+            color: #000000;
+        }
+        h1 {
+            color: #78CCCE;
+        }
+        .sorting-container {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 20px auto;
+            flex-wrap: wrap;
+        }
+        .item {
+            width: 50px;
+            height: 50px;
+            line-height: 50px;
+            font-size: 1.2rem;
+            text-align: center;
+            border: 2px solid #78CCCE;
+            border-radius: 5px;
+            background-color: #FFFFFF;
+            cursor: pointer;
+        }
+        .highlight {
+            background-color: #EF6052;
+            color: #FFFFFF;
+        }
+        button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 1rem;
+            background-color: #78CCCE;
+            color: #FFFFFF;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #EF6052;
+        }
+        .feedback {
+            margin-top: 20px;
+            font-size: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <h1>Sorting Algorithms Puzzle</h1>
+    <p>Sort the numbers in ascending order using Bubble Sort or Selection Sort.</p>
+    <div class="sorting-container" id="sorting-container"></div>
+    <button onclick="resetPuzzle()">Reset</button>
+    <button onclick="simulateBubbleSort()">Bubble Sort</button>
+    <button onclick="simulateSelectionSort()">Selection Sort</button>
+    <div class="feedback" id="feedback"></div>
+
+    <script>
+        let numbers = [5, 2, 8, 1, 4];
+        const sortingContainer = document.getElementById("sorting-container");
+        const feedback = document.getElementById("feedback");
+
+        function displayNumbers() {
+            sortingContainer.innerHTML = "";
+            numbers.forEach((num, index) => {
+                const div = document.createElement("div");
+                div.className = "item";
+                div.textContent = num;
+                div.dataset.index = index;
+                sortingContainer.appendChild(div);
+            });
+        }
+
+        function resetPuzzle() {
+            numbers = [5, 2, 8, 1, 4];
+            displayNumbers();
+            feedback.textContent = "";
+        }
+
+        async function simulateBubbleSort() {
+            feedback.textContent = "Simulating Bubble Sort...";
+            for (let i = 0; i < numbers.length - 1; i++) {
+                for (let j = 0; j < numbers.length - i - 1; j++) {
+                    highlightItems(j, j + 1);
+                    await pause(1000);
+                    if (numbers[j] > numbers[j + 1]) {
+                        [numbers[j], numbers[j + 1]] = [numbers[j + 1], numbers[j]];
+                        displayNumbers();
+                    }
+                }
+            }
+            checkIfSorted();
+        }
+
+        async function simulateSelectionSort() {
+            feedback.textContent = "Simulating Selection Sort...";
+            for (let i = 0; i < numbers.length; i++) {
+                let minIndex = i;
+                for (let j = i + 1; j < numbers.length; j++) {
+                    highlightItems(minIndex, j);
+                    await pause(1000);
+                    if (numbers[j] < numbers[minIndex]) {
+                        minIndex = j;
+                    }
+                }
+                if (minIndex !== i) {
+                    [numbers[i], numbers[minIndex]] = [numbers[minIndex], numbers[i]];
+                    displayNumbers();
+                }
+            }
+            checkIfSorted();
+        }
+
+        function highlightItems(index1, index2) {
+            const items = document.querySelectorAll(".item");
+            items.forEach((item) => item.classList.remove("highlight"));
+            items[index1].classList.add("highlight");
+            items[index2].classList.add("highlight");
+        }
+
+        function pause(ms) {
+            return new Promise((resolve) => setTimeout(resolve, ms));
+        }
+
+        function checkIfSorted() {
+            const sorted = [...numbers].sort((a, b) => a - b);
+            if (JSON.stringify(numbers) === JSON.stringify(sorted)) {
+                feedback.textContent = "Congratulations! The numbers are sorted correctly!";
+            } else {
+                feedback.textContent = "The numbers are not sorted correctly. Try again!";
+            }
+        }
+
+        // Initialize the puzzle
+        displayNumbers();
+    </script>
+</body>
+</html>
