@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hover to Collect Icons</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #ffffff;
+            overflow: hidden;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        #game-container {
+            position: relative;
+            width: 100vw;
+            height: 80vh;
+            margin-top: 5vh;
+        }
+
+        .leaf {
+            position: absolute;
+            width: 150px;
+            height: 150px;
+            cursor: pointer;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+
+        .leaf:hover {
+            transform: scale(1.2);
+        }
+
+        #scoreboard {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background-color: #ffebcc;
+            font-size: 20px;
+        }
+
+        #instructions {
+            flex: 1;
+            text-align: left;
+            color: #a3542f;
+            margin-left: 10px;
+        }
+
+        #score {
+            flex: 1;
+            text-align: center;
+            color: #a3542f;
+        }
+
+        #timer {
+            flex: 1;
+            text-align: right;
+            color: #a3542f;
+            margin-right: 10px;
+        }
+
+        #visual-timer {
+            position: relative;
+            margin: 10px auto;
+            width: 300px;
+            height: 20px;
+            background-color: #ddd;
+            border-radius: 10px;
+        }
+
+        #timer-bar {
+            height: 100%;
+            width: 100%;
+            background-color: #ff6347;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Scoreboard Section -->
+    <div id="scoreboard">
+        <div id="instructions">Hover over the icons to collect them!</div>
+        <div id="score">Score: 0</div>
+        <div id="timer">Time Left: 60</div>
+    </div>
+    <!-- Visual Timer -->
+    <div id="visual-timer">
+        <div id="timer-bar"></div>
+    </div>
+    <!-- Game Container -->
+    <div id="game-container"></div>
+
+    <audio id="hover-sound" src="https://kidstechskills.s3.amazonaws.com/wp-content/uploads/2025/01/23115327/166186__drminky__menu-screen-mouse-over.wav"></audio>
+
+    <script>
+        const gameContainer = document.getElementById('game-container');
+        const scoreDisplay = document.getElementById('score');
+        const timerDisplay = document.getElementById('timer');
+        const timerBar = document.getElementById('timer-bar');
+        const hoverSound = document.getElementById('hover-sound');
+
+        const leafImages = [
+    'https://cdn-icons-gif.flaticon.com/11974/11974885.gif',
+    'https://cdn-icons-gif.flaticon.com/17471/17471571.gif',
+    'https://cdn-icons-gif.flaticon.com/12756/12756304.gif',
+    'https://cdn-icons-gif.flaticon.com/6172/6172537.gif',
+    'https://cdn-icons-gif.flaticon.com/14183/14183484.gif',
+    'https://cdn-icons-gif.flaticon.com/13373/13373756.gif',
+    'https://cdn-icons-gif.flaticon.com/12754/12754666.gif'
+        ];
+
+        let score = 0;
+        let timeLeft = 60; // Countdown timer in seconds
+
+        function createLeaf() {
+            // Remove existing leaf if present
+            const existingLeaf = document.querySelector('.leaf');
+            if (existingLeaf) {
+                gameContainer.removeChild(existingLeaf);
+            }
+
+            // Create a new leaf
+            const leaf = document.createElement('img');
+            leaf.src = leafImages[Math.floor(Math.random() * leafImages.length)];
+            leaf.className = 'leaf';
+
+            // Ensure position is calculated based on the game container
+            const posX = Math.random() * (gameContainer.clientWidth - 150); // Keep within screen width
+            const posY = Math.random() * (gameContainer.clientHeight - 150); // Keep within screen height
+
+            leaf.style.left = `${posX}px`;
+            leaf.style.top = `${posY}px`;
+
+            // Add hover event listener
+            leaf.addEventListener('mouseenter', () => {
+                hoverSound.play();
+                score++;
+                scoreDisplay.textContent = `Score: ${score}`;
+                leaf.style.opacity = 0; // Fade out on hover
+                setTimeout(() => {
+                    createLeaf(); // Spawn a new leaf after animation
+                }, 300); // Wait for the fade-out animation
+            });
+
+            gameContainer.appendChild(leaf);
+        }
+
+        function startTimer() {
+            const timerInterval = setInterval(() => {
+                timeLeft--;
+                timerDisplay.textContent = `Time Left: ${timeLeft}`;
+                timerBar.style.width = `${(timeLeft / 60) * 100}%`;
+
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    alert(`Time's up! Your final score is ${score}`);
+                    gameContainer.innerHTML = ''; // Clear all circles
+                }
+            }, 1000);
+        }
+
+        function startGame() {
+            createLeaf();
+            startTimer();
+        }
+
+        startGame();
+    </script>
+</body>
+</html>
