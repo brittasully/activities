@@ -1,0 +1,27 @@
+body {
+  margin: 0;
+  padding: 2rem;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+main {
+  max-width: 760px;
+}
+
+form {
+  display: grid;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+input,
+textarea,
+select,
+button {
+  padding: 0.5rem;
+  font-size: 1rem;
+}
+
+ul {
+  padding-left: 1.25rem;
+}

@@ -1,0 +1,6 @@
+{
+  "entryPath": "index.html",
+  "files": ["index.html", "app.js"],
+  "templateType": "quiz",
+  "createdAt": "seeded"
+}
