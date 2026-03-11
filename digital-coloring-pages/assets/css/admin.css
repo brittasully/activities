@@ -1,0 +1,20 @@
+.dcp-admin-controls,
+.dcp-save-block {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin: 16px 0;
+  flex-wrap: wrap;
+}
+
+.dcp-admin-canvas-grid {
+  display: grid;
+  gap: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+}
+
+.dcp-admin-canvas-grid canvas {
+  width: 100%;
+  border: 1px solid #ccd0d4;
+  background: #fff;
+}
