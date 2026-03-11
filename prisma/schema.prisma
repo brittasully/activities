@@ -1,0 +1,221 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  teacher
+  student
+}
+
+enum ActivityTemplateType {
+  quiz
+  dragdrop
+  typing
+  flashcards
+  canvas
+  custom
+}
+
+enum ActivityStatus {
+  draft
+  published
+  archived
+}
+
+enum SubmissionStatus {
+  not_started
+  in_progress
+  submitted
+  completed
+  reviewed
+  needs_revision
+}
+
+model User {
+  id            String         @id @default(cuid())
+  role          UserRole
+  name          String
+  email         String?        @unique
+  passwordHash  String?
+  createdAt     DateTime       @default(now())
+
+  taughtClasses Class[]        @relation("ClassTeacher")
+  activities    Activity[]     @relation("ActivityTeacher")
+  classStudents ClassStudent[] @relation("StudentMembership")
+  submissions   Submission[]   @relation("StudentSubmissions")
+  feedbackGiven Feedback[]     @relation("TeacherFeedback")
+  sessions      Session[]
+
+  @@index([role])
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  role      UserRole
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([role])
+  @@index([expiresAt])
+}
+
+model Class {
+  id            String         @id @default(cuid())
+  teacherId     String
+  name          String
+  gradeBand     String?
+  accessCode    String         @unique
+  createdAt     DateTime       @default(now())
+
+  teacher       User           @relation("ClassTeacher", fields: [teacherId], references: [id], onDelete: Cascade)
+  classStudents ClassStudent[]
+  assignments   Assignment[]
+
+  @@index([teacherId])
+}
+
+model ClassStudent {
+  id         String   @id @default(cuid())
+  classId    String
+  studentId  String
+  joinCode   String?
+  createdAt  DateTime @default(now())
+
+  class      Class    @relation(fields: [classId], references: [id], onDelete: Cascade)
+  student    User     @relation("StudentMembership", fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@index([classId])
+  @@index([studentId])
+  @@unique([classId, studentId])
+}
+
+model Activity {
+  id               String               @id @default(cuid())
+  teacherId        String
+  title            String
+  description      String?
+  draftConfigJson  Json?
+  templateType     ActivityTemplateType
+  status           ActivityStatus       @default(draft)
+  createdAt        DateTime             @default(now())
+  updatedAt        DateTime             @updatedAt
+
+  teacher          User                 @relation("ActivityTeacher", fields: [teacherId], references: [id], onDelete: Cascade)
+  versions         ActivityVersion[]
+
+  @@index([teacherId])
+}
+
+model ActivityVersion {
+  id             String       @id @default(cuid())
+  activityId     String
+  versionNumber  Int
+  bundleKey      String
+  entryPath      String
+  manifestJson   Json
+  createdAt      DateTime     @default(now())
+  publishedAt    DateTime?
+
+  activity       Activity     @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  assignments    Assignment[]
+
+  @@index([activityId])
+  @@unique([activityId, versionNumber])
+}
+
+model Assignment {
+  id                String          @id @default(cuid())
+  classId           String
+  activityVersionId String
+  title             String
+  settingsJson      Json?
+  startAt           DateTime?
+  dueAt             DateTime?
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+
+  class             Class           @relation(fields: [classId], references: [id], onDelete: Cascade)
+  activityVersion   ActivityVersion @relation(fields: [activityVersionId], references: [id], onDelete: Cascade)
+  submissions       Submission[]
+
+  @@index([classId])
+  @@index([activityVersionId])
+}
+
+model Submission {
+  id               String           @id @default(cuid())
+  assignmentId     String
+  studentId        String
+  status           SubmissionStatus @default(not_started)
+  score            Int?
+  maxScore         Int?
+  startedAt        DateTime?
+  submittedAt      DateTime?
+  completedAt      DateTime?
+  lastActiveAt     DateTime?
+  timeSpentSeconds Int              @default(0)
+  latestStateJson  Json?
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+
+  assignment       Assignment       @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  student          User             @relation("StudentSubmissions", fields: [studentId], references: [id], onDelete: Cascade)
+  submissionEvents SubmissionEvent[]
+  artifacts        Artifact[]
+  feedback         Feedback[]
+
+  @@unique([assignmentId, studentId])
+  @@index([assignmentId])
+  @@index([studentId])
+}
+
+model SubmissionEvent {
+  id           String     @id @default(cuid())
+  submissionId String
+  type         String
+  payloadJson  Json
+  createdAt    DateTime   @default(now())
+
+  submission   Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+
+  @@index([submissionId])
+}
+
+model Artifact {
+  id           String     @id @default(cuid())
+  submissionId String
+  type         String
+  storageUrl   String
+  filename     String
+  mimeType     String
+  createdAt    DateTime   @default(now())
+
+  submission   Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+
+  @@index([submissionId])
+}
+
+model Feedback {
+  id           String            @id @default(cuid())
+  submissionId String
+  teacherId    String
+  commentText  String
+  statusUpdate SubmissionStatus?
+  createdAt    DateTime          @default(now())
+
+  submission   Submission        @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  teacher      User              @relation("TeacherFeedback", fields: [teacherId], references: [id], onDelete: Cascade)
+
+  @@index([submissionId])
+  @@index([teacherId])
+}
