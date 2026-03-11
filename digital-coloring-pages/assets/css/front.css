@@ -1,0 +1,40 @@
+.dcp-coloring-app {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 14px;
+  background: #fafafa;
+  max-width: 960px;
+}
+
+.dcp-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.dcp-palette {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.dcp-color-swatch {
+  width: 28px;
+  height: 28px;
+  border: 2px solid #222;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.dcp-color-swatch[aria-checked='true'] {
+  outline: 3px solid #2271b1;
+}
+
+.dcp-canvas {
+  width: 100%;
+  border: 1px solid #333;
+  background: #fff;
+  touch-action: none;
+}
